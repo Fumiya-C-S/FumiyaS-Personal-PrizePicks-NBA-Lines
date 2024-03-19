@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prize Picks Parsed Data</title>
+</head>
+<style>
+
+    li {
+        padding-right: 1px;
+        padding-left: 10px;
+        padding-top: 1px;
+        padding-bottom: 1px;
+        width: 300px;
+    }
+
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    h1{
+        text-transform: uppercase;
+    }
+
+    .container{
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    
+
+
+
+</style>
+
+<body>
+    
+    
+
+    <div class="container">
+        <h1>NBA Players:</h1>
+        <div class="player">
+            <ol id="listContainer"></ol>
+        </div>
+    </div>
+
+
+    <script>
+
+        const URL = "PrizePicksAPI.json";
+
+
+        async function fetchData(){
+            fetch(URL)
+            .then(res => {
+                if (!res.ok){
+                    console.log("Problem");
+                    return;
+                }
+
+                console.log(res.json)
+
+                return res.json();
+            })
+            .then(data => {
+                console.log(data);
+
+                const listContainer = document.getElementById("listContainer");
+
+                data["included"].forEach(player => {
+
+                        const listItem = document.createElement('li');
+                        if (player.attributes.league == "NBA" || player.attributes.league == "NBA1H" || player.attributes.league == "NBA4Q"){
+                            listItem.textContent = player.attributes.display_name;
+
+                            if (player.attributes.market){
+                                const nestedList = document.createElement('ul');
+                                const teamName = document.createElement('li');
+                                var team = player.attributes.team + " " + player.attributes.team_name;
+                                teamName.textContent = team;
+
+                                nestedList.appendChild(teamName);
+                                listItem.appendChild(nestedList);
+                            }
+                            listContainer.appendChild(listItem);
+
+                            data["data"].forEach(proj =>{
+                
+                                if (player.id == proj.relationships.new_player.data.id){
+
+                                    const nestedList_statType = document.createElement('ul');
+                                    const statType = document.createElement('li');
+                                    var stat = proj.attributes.stat_type + " " + proj.attributes.line_score;
+                                    statType.textContent = stat;
+                                    
+                                    nestedList_statType.appendChild(statType);
+                                    listItem.appendChild(nestedList_statType);
+                                }
+
+                                
+                            });
+                        }
+
+                });
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        }
+
+
+
+        fetchData();
+
+    </script>
+
+
+</body>
+</html>
